@@ -1,0 +1,40 @@
+<% content_for :head do%>
+<% end %>
+<h1>User#Index</h1>
+<p><a id="signup">Signup</a></p>
+<div id="signup-wrapper">
+	<div id="signup-form" class="form">
+		<div class="form-field">
+			<label>Email</label>
+			<input type="text" id="signup-email">
+		</div>
+		
+		<div class="form-field">
+			<label>First name</label>
+			<input type="text" id="signup-firstname">
+		</div>
+		
+		<div class="form-field">
+			<label>Last name</label>
+			<input type="text" id="signup-lastname">
+		</div>
+		
+		<div class="form-field">
+			<label>Password</label>
+			<input type="password" id="signup-password">
+		</div>
+		
+		<div class="form-field">
+			<label>Password confirmation</label>
+			<input type="password" id="signup-password-confirmation">
+		</div>
+		
+		<div class="form-actions">
+			<a class="form-actions-submit" id="signup-submit" href="#"> create a new account </a>
+		</div>
+	</div>
+</div>
+<div id="token" style="display:none;"><%= params[:token]%></div>
+<div id="status"></div>
+
+

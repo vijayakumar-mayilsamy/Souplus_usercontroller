@@ -1,0 +1,59 @@
+<% content_for :head do%>
+    <script type="text/javascript">      
+		$(document).ready(function(){
+			var form = $('#signup-form');
+			var email = $('#signup-email');
+			var submit = $('#signup-submit');
+			var submit_content = $(submit).html();
+			var emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+			
+			$(submit).click(function(e){
+				e.preventDefault();
+				resetMessage();
+				$('.invalid-input').removeClass('invalid-input');
+				if (!emailReg.test($(email).val())){
+					errorMessage("Are you sure this sdfgdsg is your email?");
+					$(email).addClass('invalid-input');
+				}else{
+					$.ajax({
+						url: API_DOMAIN+'/users/signup.json?email='+escape($(email).val()),
+						beforeSend: function(){
+							$(submit).loading();
+						},
+						success: function(obj){
+							$(submit).empty().unloading();
+							$(submit).html(submit_content);
+							// alert(obj.status);
+							if (obj.status==='success'){															
+								$(form).html(obj.message);
+							}else{
+								errorMessage(obj.message);
+							}
+						}
+					})
+				}
+				
+			})
+			
+			var root = $('#signup-wrapper');
+			$('<div class="or-wrapper"></div>').html('or').appendTo(root);
+			var fb_wrapper = $('<div id="fb-signin-wrapper"></div>').appendTo(root);
+			$('<a></a>').attr('href', 'https://www.facebook.com/dialog/oauth?client_id='+FB_APP_ID+'&redirect_uri='+window.location+'&scope=email,user_checkins&response_type=token').html('<img src="/assets/f_logo.png">Facebook Sign in').appendTo(fb_wrapper);
+			
+			
+		})
+	</script>
+<% end %>
+<div id="signup-wrapper">
+	<div id="signup-form" class="form">
+		<div class="form-field">
+			<label>Email</label>
+			<input type="text" id="signup-email">
+		</div>
+				
+		<div class="form-actions">
+			<a class="form-actions-submit" id="signup-submit" href="#"> sign up </a>
+		</div>
+	</div>
+</div>
+

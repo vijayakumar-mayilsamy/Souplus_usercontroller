@@ -1,0 +1,109 @@
+<% content_for :head do%>
+    <script type="text/javascript">      
+
+		$(document).ready(function(){	
+			$('#nav-bar-ranking').addClass('nav-bar-current');
+			rankingTabs.build();				
+		})
+		
+		var rankingTabs = {
+			stage: $('<div id="ranking-stage"></div>'),
+			build: function(){				
+				var rankingTabs = this;
+				var tabs = $('<div id="ranking-tabs"></div>').appendTo('#ranking-wrapper');
+				$('<a href="#" id="top-users-tab"></a>').html('Users').appendTo(tabs).click(function(e){
+					e.preventDefault();
+					rankingTabs.topUsers();
+				});
+				$('<a href="#" id="top-restaurants-tab"></a>').html('Restaurants').appendTo(tabs).click(function(e){
+					e.preventDefault();
+					rankingTabs.topRestaurants();
+				});
+				$('<a href="#" id="top-dishes-tab"></a>').html('Dishes').appendTo(tabs).click(function(e){
+					e.preventDefault();
+					rankingTabs.topDishes();
+				});				
+				rankingTabs.stage.appendTo('#ranking-wrapper');
+				rankingTabs.topUsers();
+			},
+			topUsers: function(){
+				var rankingTabs = this;
+				$('#ranking-tabs a').removeClass('current-tab');
+				$('#top-users-tab').addClass('current-tab');
+				$.ajax({
+					url: API_DOMAIN+'/rankings/top_users.json?r='+Math.random()*999999,
+					dataType: 'json',
+					beforeSend: function(){
+						$(rankingTabs.stage).loading();
+					},
+					success: function(obj){
+						$(rankingTabs.stage).empty().unloading();
+						var title = $('<div id="ranking-title"></div>').appendTo(rankingTabs.stage);
+						$('<div class="ranking-name"></div>').html('Name').appendTo(title);
+						$('<div class="ranking-stats"></div>').html('Coins').appendTo(title);
+						$.each(obj.data, function(i,v){
+							var row = $('<div class="ranking-row"></div>').hide().appendTo(rankingTabs.stage).fadeIn();
+							$('<a class="ranking-name"></a>').attr('href','@'+v.username).html(v.name).appendTo(row);							
+							$('<div class="ranking-stats"></div>').html(v.point).appendTo(row);
+						})
+					},
+					error: function(xhr, status, error) {
+					    alert('status: '+xhr.status+'\n error: '+error);
+				    }
+				})				
+			},
+			topRestaurants: function(){
+				var rankingTabs = this;
+				$('#ranking-tabs a').removeClass('current-tab');
+				$('#top-restaurants-tab').addClass('current-tab');
+				$.ajax({
+					url: API_DOMAIN+'/rankings/top_restaurants.json',
+					dataType: 'json',
+					beforeSend: function(){
+						$(rankingTabs.stage).loading();
+					},
+					success: function(obj){
+						$(rankingTabs.stage).empty().unloading();
+						var title = $('<div id="ranking-title"></div>').appendTo(rankingTabs.stage);
+						
+						$('<div class="ranking-name"></div>').html('Restaurant').appendTo(title);						
+						$('<div class="ranking-stats"></div>').html('Dishes').appendTo(title);
+						$.each(obj.data, function(i,v){
+							var row = $('<div class="ranking-row"></div>').hide().appendTo(rankingTabs.stage).fadeIn();							
+							$('<a class="ranking-name"></a>').attr('href','/restaurants/'+v.id).html(v.name).appendTo(row);							
+							$('<div class="ranking-stats"></div>').html(v.items_count).appendTo(row);
+						})
+					}
+				})
+			},
+			topDishes: function(){
+				var rankingTabs = this;
+				$('#ranking-tabs a').removeClass('current-tab');
+				$('#top-dishes-tab').addClass('current-tab');
+				$.ajax({
+					url: API_DOMAIN+'/rankings/top_dishes.json',
+					dataType: 'json',
+					beforeSend: function(){
+						$(rankingTabs.stage).loading();
+					},
+					success: function(obj){
+						$(rankingTabs.stage).empty().unloading();
+						var title = $('<div id="ranking-title"></div>').appendTo(rankingTabs.stage);
+						$('<div class="ranking-name"></div>').html('Dish').appendTo(title);			
+						$('<div class="ranking-stats"></div>').html('Likes').appendTo(title);									
+						$.each(obj.data, function(i,v){
+							var row = $('<div class="ranking-row"></div>').hide().appendTo(rankingTabs.stage).fadeIn();							
+							$('<a class="ranking-name"></a>').attr('href','/dishes/'+v.item_id).html(v.item_name).appendTo(row);							
+							$('<div class="ranking-stats"></div>').html(v.soupluses_count).appendTo(row);
+						})
+					}
+				})
+				
+			}
+		}
+		
+	</script>
+<% end %>
+
+<div id="ranking-wrapper">
+</div>

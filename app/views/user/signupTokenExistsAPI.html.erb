@@ -1,0 +1,126 @@
+<% content_for :head do%>
+    <script type="text/javascript">      
+		$(document).ready(function(){
+			var wrapper = $('#signup-wrapper').hide();
+			var token = $('#token').html();
+			var status = $('#status');
+			$.ajax({
+				url: API_DOMAIN+'/users/'+token+'/signup_token_exists.json',
+				dataType: 'json',
+				beforeSend: function(){
+					$(status).loading();
+				},
+				success: function(obj){
+					$(status).empty().unloading();
+					if (obj.status=='success'){
+						$(wrapper).fadeIn();					
+						$('<div id="signup-email-div"></div>').html(obj.email).appendTo($('#signup-email').parent());
+						$('#signup-email').remove();
+						submitSignupForm(token);
+					}else{
+						$(wrapper).html("You don't seem to have the valid sign-up token to create a new account. Sorry!").fadeIn();
+					}
+				}
+			})
+			
+		})
+		
+		function submitSignupForm(token){
+			var form = $('#signup-form');
+			var firstname = $('#signup-firstname');
+			var lastname = $('#signup-lastname');
+			var password = $('#signup-password');
+			var password_confirmation = $('#signup-password-confirmation');
+			var submit = $('#signup-submit');
+			var submit_content = $(submit).html();
+			
+			$(submit).click(function(e){
+				e.preventDefault();
+				validatesAndSubmitSignup();
+			})
+			
+			$('input').keypress(function(e){
+				if (e.keyCode==13){
+					validatesAndSubmitSignup();					
+				}
+			})
+			
+			function validatesAndSubmitSignup(){
+				resetMessage();
+				if ($(firstname).val().length==0){
+					$(firstname).addClass('invalid-input');
+					errorMessage('First name is required');
+				}else{
+					if ($(lastname).val().length==0){
+						$(lastname).addClass('invalid-input');
+						errorMessage('Last name is required');
+					}else{
+						if ($(password).val().length==0){
+							$(password).addClass('invalid-input');
+							errorMessage('Password is required');
+						}else{
+							if ($(password_confirmation).val()!=$(password).val()){
+								$(password_confirmation).addClass('invalid-input');
+								errorMessage('Did you type in the same password?');												
+							}else{
+								$.ajax({
+									url: API_DOMAIN+'/users/'+token+'/create.json?first_name='+escape($(firstname).val())+'&last_name='+escape($(lastname).val())+'&password='+escape($(password).val())+'&password_confirmation='+escape($(password_confirmation).val()),
+									beforeSend: function(){
+										$(submit).loading();
+									},
+									success: function(obj){
+										$(submit).empty().unloading();
+										$(submit).html(submit_content);
+										// alert(obj.status);
+										if (obj.status==='success'){															
+											$(form).html(obj.message);
+											$.cookie('token', obj.token, {expires: 7, path: '/'});
+											userBar.refresh($.cookie('token'));
+											setTimeout(function(){window.location = '/';}, 3000);
+										}else{
+											errorMessage(obj.message);
+										}
+									}
+								})
+							}
+						}
+					}
+				}
+			}
+		}
+	</script>
+<% end %>
+<div id="signup-wrapper">
+	<div id="signup-form" class="form">
+		<div class="form-field">
+			<label>Email</label>
+			<input type="text" id="signup-email">
+		</div>
+		
+		<div class="form-field">
+			<label>First name</label>
+			<input type="text" id="signup-firstname">
+		</div>
+		
+		<div class="form-field">
+			<label>Last name</label>
+			<input type="text" id="signup-lastname">
+		</div>
+		
+		<div class="form-field">
+			<label>Password</label>
+			<input type="password" id="signup-password">
+		</div>
+		
+		<div class="form-field">
+			<label>Password confirmation</label>
+			<input type="password" id="signup-password-confirmation">
+		</div>
+		
+		<div class="form-actions">
+			<a class="form-actions-submit" id="signup-submit" href="#"> create a new account </a>
+		</div>
+	</div>
+</div>
+<div id="token" style="display:none;"><%= params[:token]%></div>
+<div id="status"></div>
